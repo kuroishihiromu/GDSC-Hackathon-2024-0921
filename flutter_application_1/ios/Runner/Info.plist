@@ -45,9 +45,5 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
-	<key>NSCameraUsageDescription</key>
-	<string>学生証をスキャンするためにカメラの使用が必要です。</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>学生証画像を選択するためにフォトライブラリの使用が必要です。</string>
 </dict>
 </plist>
