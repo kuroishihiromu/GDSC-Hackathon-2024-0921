@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "288321613619",
+    "project_id": "gdsc-2024-0921",
+    "storage_bucket": "gdsc-2024-0921.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:288321613619:android:c8eda6b50c5fd79d8e1846",
+        "android_client_info": {
+          "package_name": "com.example.flutter_application_1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDuGTgUl1JBQMozE0GJRNxZ9_pTAdNqqHo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:288321613619:android:d8781a424960e68f8e1846",
+        "android_client_info": {
+          "package_name": "com.gdsc_hackathon_2024_0921.flutter_application_1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDuGTgUl1JBQMozE0GJRNxZ9_pTAdNqqHo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
