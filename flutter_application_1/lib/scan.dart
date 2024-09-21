@@ -1,9 +1,9 @@
 import 'dart:async'; // Completerのためのインポート
 import 'dart:convert';
 import 'dart:typed_data';
-// ignore: avoid_web_libraries_in_flutter
-import 'dart:html' as html;
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart'; // 画像選択用パッケージ
 import 'package:google_generative_ai/google_generative_ai.dart'; // GenerativeModelのインポート
 
 // OCRと生成AI用のAPIキーを指定
@@ -12,26 +12,14 @@ const String generativeAiApiKey = '***';
 
 // 画像選択処理
 Future<Uint8List?> performImageScan() async {
-  final html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
-  uploadInput.accept = 'image/*';
-  uploadInput.click();
+  final picker = ImagePicker();
+  final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-  final completer = Completer<Uint8List?>();
-
-  uploadInput.onChange.listen((e) {
-    final files = uploadInput.files;
-    if (files != null && files.isNotEmpty) {
-      final reader = html.FileReader();
-      reader.readAsArrayBuffer(files[0]);
-      reader.onLoadEnd.listen((e) {
-        completer.complete(reader.result as Uint8List?);
-      });
-    } else {
-      completer.complete(null);
-    }
-  });
-
-  return completer.future;
+  if (pickedFile != null) {
+    return await pickedFile.readAsBytes();
+  } else {
+    return null;
+  }
 }
 
 // OCR処理
