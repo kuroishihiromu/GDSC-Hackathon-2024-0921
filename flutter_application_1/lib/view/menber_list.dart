@@ -39,18 +39,18 @@ class StudentCardList extends StatelessWidget {
     {
       "id": "1",
       "name": "中野雅",
-      "student_id": "*******",
+      "student_id": "2420523",
       "university": "お茶の水女子大学",
-      "facaulty": "****",
+      "facaulty": "情報科学科",
       "department": "*****",
        "created_at": "2024/09/21"
     },
     {
       "id": "2",
       "name": "佐藤有紗",
-      "student_id": "********",
+      "student_id": "24140042",
       "university": "東京都立大学",
-      "facaulty": "****",
+      "facaulty": "システムデザイン学部",
       "department": "*****",
        "created_at": "2024/09/21"
     }
