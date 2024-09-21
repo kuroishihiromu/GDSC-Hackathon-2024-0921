@@ -1,4 +1,6 @@
+import 'dart:convert';  // JSONをデコードするために必要
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';  // assetsから読み込むために必要
 
 void main() {
   runApp(const MyApp());
