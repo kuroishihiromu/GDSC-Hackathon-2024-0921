@@ -1,35 +1,30 @@
+// member_list.dart
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MemberList extends StatelessWidget {
+  const MemberList({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: DefaultTabController(
-        length: 3,
-        child: Scaffold(
-          appBar: AppBar(
-            title: const Text('一覧'),
-            bottom: const TabBar(tabs: <Widget>[
-              Tab(child: Text("TeamA")),
-              Tab(child: Text("TeamB")),
-              Tab(child: Text("TeamC")),
-            ]),
-          ),
-          body: const TabBarView(
-            children: <Widget>[
-              StudentCardList(), // 一枚目のタブにStudentCardListを表示
-              Center(child: Text("Team B の情報がここに表示されます。")),
-              Center(child: Text("Team C の情報がここに表示されます。")),
-            ],
-          ),
+    return DefaultTabController(
+      length: 3,
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('一覧'),
+          bottom: const TabBar(tabs: <Widget>[
+            Tab(child: Text("TeamA")),
+            Tab(child: Text("TeamB")),
+            Tab(child: Text("TeamC")),
+          ]),
+        ),
+        body: const TabBarView(
+          children: <Widget>[
+            StudentCardList(),
+            Center(child: Text("Team B の情報がここに表示されます。")),
+            Center(child: Text("Team C の情報がここに表示されます。")),
+          ],
         ),
       ),
     );
@@ -42,10 +37,9 @@ class StudentCardList extends StatelessWidget {
   Future<List<Map<String, String>>> loadStudents() async {
     final String response = await rootBundle.loadString('assets/Database.json');
     final data = json.decode(response);
-    
-    // dynamicを使って正しい型に変換
+
     return List<Map<String, String>>.from(
-      (data['students'] as List).map((student) => Map<String, String>.from(student))
+      (data['students'] as List).map((student) => Map<String, String>.from(student)),
     );
   }
 
@@ -77,7 +71,7 @@ class StudentCardList extends StatelessWidget {
                       const SizedBox(height: 8),
                       Text("学籍番号: ${students[index]['student_id']}"),
                       Text("大学: ${students[index]['university']}"),
-                      Text("学部: ${students[index]['facaulty']}"),
+                      Text("学部: ${students[index]['faculty']}"), // 修正
                     ],
                   ),
                 ),
