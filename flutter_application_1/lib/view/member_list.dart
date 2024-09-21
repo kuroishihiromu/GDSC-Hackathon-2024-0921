@@ -1,35 +1,6 @@
-import 'dart:convert';  // JSONをデコードするために必要
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';  // assetsから読み込むために必要
-
-
-
-class Member {
-  final int memberId;
-  final String? name;
-  final String? studentId; 
-  final String? universityname;
-  final String? faculty;
-  final String? department;
-  final String? createdat;
-
-  Member({required this.memberId, required this.name, required this.studentId, required this. universityname, required this. faculty, required this. createdat, required this.department});
-  
-
-  // JSONデータをDartオブジェクトに変換するためのファクトリメソッド
-  // ignore: empty_constructor_bodies
-  factory Member.fromJson(Map<String, dynamic> json) {
-    return Member(
-      memberId: json['member_id'] ?? 0,
-      name: json['name'] ?? "NULL",
-      studentId: json['student_id'] ?? "NULL",
-      universityname: json['university_name'] ?? "NULL",
-      faculty: json['faculty'] ?? "NULL",
-      department: json['department'] ?? "NULL",
-      createdat: json['created_at'] ?? "NULL"
-    );
-  }
-}
+import 'dart:convert';
+import 'package:flutter/services.dart';
 
 void main() {
   runApp(const MyApp());
@@ -41,110 +12,80 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Student Card Example',
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('TeamA'),
+      home: DefaultTabController(
+        length: 3,
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('一覧'),
+            bottom: const TabBar(tabs: <Widget>[
+              Tab(child: Text("TeamA")),
+              Tab(child: Text("TeamB")),
+              Tab(child: Text("TeamC")),
+            ]),
+          ),
+          body: const TabBarView(
+            children: <Widget>[
+              StudentCardList(), // 一枚目のタブにStudentCardListを表示
+              Center(child: Text("Team B の情報がここに表示されます。")),
+              Center(child: Text("Team C の情報がここに表示されます。")),
+            ],
+          ),
         ),
-        body: const StudentCardList(),
       ),
     );
   }
 }
 
 class StudentCardList extends StatelessWidget {
-
   const StudentCardList({super.key});
 
-  // get children => null;
-
-  Future<List<Member>> loadMemberList() async {
-    // assetsからJSONファイルを読み込み
+  Future<List<Map<String, String>>> loadStudents() async {
     final String response = await rootBundle.loadString('assets/Database.json');
-    final data = json.decode(response); // JSONデータをデコード
-    List<dynamic> membersJson = data;
+    final data = json.decode(response);
     
-    // 各メンバーのデータをMemberオブジェクトに変換してリストにする
-    return membersJson.map((json) => Member.fromJson(json)).toList();
+    // dynamicを使って正しい型に変換
+    return List<Map<String, String>>.from(
+      (data['students'] as List).map((student) => Map<String, String>.from(student))
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-
-    final  Future<List<Member>>  students = loadMemberList();
-
-    return FutureBuilder<List>(
-        future: students, // Future<T> 型を返す非同期処理
-        builder: (BuildContext context, AsyncSnapshot<List> snapshot){
-
-        
-          List<Widget> children;
-    
-          
-          if (snapshot.hasData) { // 値が存在する場合の処理
+    return FutureBuilder<List<Map<String, String>>>(
+      future: loadStudents(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else {
+          final students = snapshot.data!;
           return ListView.builder(
-             itemCount: snapshot.data!.length,
-          itemBuilder: (context, index) {
-        return Card(
-          margin: const EdgeInsets.all(10),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  snapshot.data![index]['name']!,
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            itemCount: students.length,
+            itemBuilder: (context, index) {
+              return Card(
+                margin: const EdgeInsets.all(10),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        students[index]['name']!,
+                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      Text("学籍番号: ${students[index]['student_id']}"),
+                      Text("大学: ${students[index]['university']}"),
+                      Text("学部: ${students[index]['facaulty']}"),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 8),
-                Text("学籍番号: ${snapshot.data![index]['student_id']}"),
-                Text("大学: ${snapshot.data![index]['university']}"),
-                Text("学部: ${snapshot.data![index]['faculty']}"),
-              ],
-            ),
-          ),
-        );
+              );
+            },
+          );
+        }
       },
-          );
-         
-          } else if (snapshot.hasError) {// エラーが発生した場合の処理
-            children = <Widget>[
-              const Icon(
-                Icons.error_outline,
-                color: Colors.red,
-                size: 60,
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: Text('Error: ${snapshot.error}'),
-              ),
-            ];
-          } else { // 値が存在しない場合の処理
-            children = const <Widget>[
-              SizedBox(
-                width: 60,
-                height: 60,
-                child: CircularProgressIndicator(),
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: 16),
-                child: Text('Awaiting result...'),
-              ),
-            ];
-          }
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: children,
-            ),
-          );
-        },
-      
     );
-  
-  
   }
-}
-
-extension on Future<List<Member>> {
 }
