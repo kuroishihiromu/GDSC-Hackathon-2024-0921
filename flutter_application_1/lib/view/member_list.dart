@@ -31,11 +31,6 @@ class Member {
   }
 }
 
-class MemberListService {
-  // assetsからdatabase.jsonを読み込んで、Memberのリストを返す
-  
-}
-
 void main() {
   runApp(const MyApp());
 }
