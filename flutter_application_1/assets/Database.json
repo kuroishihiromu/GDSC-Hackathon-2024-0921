@@ -1,25 +1,22 @@
-
-
-    [
-        {
-        "member_id":1,
-        "name":"中野雅",
-        "student_id":"********",
-        "university_name":"*********大学",
-        "faculty":"*****学部",
-        "department": "***学科",
+{
+    "students": [
+      {
+        "id": "1",
+        "name": "中野雅",
+        "student_id": "*******",
+        "university": "お茶の水女子大学",
+        "facaulty": "****",
+        "department": "*****",
         "created_at": "2024/09/21"
-
-        },
-        {
-        "member_id":2,
-        "name":"佐藤有紗",
-        "student_id":"********",
-        "university":"*********大学",
-        "faculty":"*****学部",
-        "department": "***学科",
+      },
+      {
+        "id": "2",
+        "name": "佐藤有紗",
+        "student_id": "********",
+        "university": "東京都立大学",
+        "facaulty": "****",
+        "department": "*****",
         "created_at": "2024/09/21"
-
-         }
+      }
     ]
-  
+  }  
