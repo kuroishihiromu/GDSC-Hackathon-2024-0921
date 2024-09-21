@@ -6,12 +6,12 @@ import 'package:flutter/services.dart';  // assetsから読み込むために必
 
 class Member {
   final int memberId;
-  final String name;
-  final String studentId; 
-  final String universityname;
-  final String faculty;
-  final String department;
-  final String createdat;
+  final String? name;
+  final String? studentId; 
+  final String? universityname;
+  final String? faculty;
+  final String? department;
+  final String? createdat;
 
   Member({required this.memberId, required this.name, required this.studentId, required this. universityname, required this. faculty, required this. createdat, required this.department});
   
@@ -20,13 +20,13 @@ class Member {
   // ignore: empty_constructor_bodies
   factory Member.fromJson(Map<String, dynamic> json) {
     return Member(
-      memberId: json['member_id'],
-      name: json['name'],
-      studentId: json['student_id'],
-      universityname: json['university_name'],
-      faculty: json['faculty'],
-      department: json['department'],
-      createdat: json['created_at']
+      memberId: json['member_id'] ?? 0,
+      name: json['name'] ?? "NULL",
+      studentId: json['student_id'] ?? "NULL",
+      universityname: json['university_name'] ?? "NULL",
+      faculty: json['faculty'] ?? "NULL",
+      department: json['department'] ?? "NULL",
+      createdat: json['created_at'] ?? "NULL"
     );
   }
 }
@@ -61,11 +61,13 @@ class StudentCardList extends StatelessWidget {
 
   const StudentCardList({super.key});
 
+  // get children => null;
+
   Future<List<Member>> loadMemberList() async {
     // assetsからJSONファイルを読み込み
     final String response = await rootBundle.loadString('assets/Database.json');
     final data = json.decode(response); // JSONデータをデコード
-    List<dynamic> membersJson = data['member_list'];
+    List<dynamic> membersJson = data;
     
     // 各メンバーのデータをMemberオブジェクトに変換してリストにする
     return membersJson.map((json) => Member.fromJson(json)).toList();
@@ -76,22 +78,40 @@ class StudentCardList extends StatelessWidget {
 
     final  Future<List<Member>>  students = loadMemberList();
 
-    child: FutureBuilder<List>(
+    return FutureBuilder<List>(
         future: students, // Future<T> 型を返す非同期処理
-        builder: (BuildContext context, AsyncSnapshot<List> snapshot) {
+        builder: (BuildContext context, AsyncSnapshot<List> snapshot){
+
+        
           List<Widget> children;
+    
+          
           if (snapshot.hasData) { // 値が存在する場合の処理
-            children = <Widget>[
-              const Icon(
-                Icons.check_circle_outline,
-                color: Colors.green,
-                size: 60,
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 16),
-                child: Text('Result: ${snapshot.data}'),
-              ),
-            ];
+          return ListView.builder(
+             itemCount: snapshot.data!.length,
+          itemBuilder: (context, index) {
+        return Card(
+          margin: const EdgeInsets.all(10),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  snapshot.data![index]['name']!,
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text("学籍番号: ${snapshot.data![index]['student_id']}"),
+                Text("大学: ${snapshot.data![index]['university']}"),
+                Text("学部: ${snapshot.data![index]['faculty']}"),
+              ],
+            ),
+          ),
+        );
+      },
+          );
+         
           } else if (snapshot.hasError) {// エラーが発生した場合の処理
             children = <Widget>[
               const Icon(
@@ -127,33 +147,9 @@ class StudentCardList extends StatelessWidget {
       
     );
   
-    return ListView.builder(
-      itemCount: students.length,
-      itemBuilder: (context, index) {
-        return Card(
-          margin: const EdgeInsets.all(10),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  students[index]['name']!,
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                Text("学籍番号: ${students[index]['student_id']}"),
-                Text("大学: ${students[index]['university']}"),
-                Text("学部: ${students[index]['faculty']}"),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+  
   }
 }
 
 extension on Future<List<Member>> {
-  get length => null;
 }
