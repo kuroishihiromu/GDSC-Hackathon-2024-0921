@@ -33,15 +33,7 @@ class Member {
 
 class MemberListService {
   // assetsからdatabase.jsonを読み込んで、Memberのリストを返す
-  Future<List<Member>> loadMemberList() async {
-    // assetsからJSONファイルを読み込み
-    final String response = await rootBundle.loadString('assets/Database.json');
-    final data = json.decode(response); // JSONデータをデコード
-    List<dynamic> membersJson = data['member_list'];
-    
-    // 各メンバーのデータをMemberオブジェクトに変換してリストにする
-    return membersJson.map((json) => Member.fromJson(json)).toList();
-  }
+  
 }
 
 void main() {
@@ -54,37 +46,87 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: DefaultTabController(
-        length: 3,
-        child: Scaffold(
-          appBar: AppBar(
-            title: const Text('一覧'),
-            bottom: const TabBar(tabs: <Widget>[
-              Tab(child: Text("TeamA")),
-              Tab(child: Text("TeamB")),
-              Tab(child: Text("TeamC")),
-            ]),
-          ),
-          body: TabBarView(
-            children: <Widget>[
-              StudentCardList(), // 一枚目のタブにStudentCardListを表示
-              Center(child: Text("Team B の情報がここに表示されます。")),
-              Center(child: Text("Team C の情報がここに表示されます。")),
-            ],
-          ),
+      title: 'Student Card Example',
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('TeamA'),
         ),
+        body: const StudentCardList(),
       ),
     );
   }
 }
 
 class StudentCardList extends StatelessWidget {
-  final students = MemberListService() as List<Map<String, String>>;
 
-  StudentCardList({super.key});
+  const StudentCardList({super.key});
+
+  Future<List<Member>> loadMemberList() async {
+    // assetsからJSONファイルを読み込み
+    final String response = await rootBundle.loadString('assets/Database.json');
+    final data = json.decode(response); // JSONデータをデコード
+    List<dynamic> membersJson = data['member_list'];
+    
+    // 各メンバーのデータをMemberオブジェクトに変換してリストにする
+    return membersJson.map((json) => Member.fromJson(json)).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
+
+    final  Future<List<Member>>  students = loadMemberList();
+
+    child: FutureBuilder<List>(
+        future: students, // Future<T> 型を返す非同期処理
+        builder: (BuildContext context, AsyncSnapshot<List> snapshot) {
+          List<Widget> children;
+          if (snapshot.hasData) { // 値が存在する場合の処理
+            children = <Widget>[
+              const Icon(
+                Icons.check_circle_outline,
+                color: Colors.green,
+                size: 60,
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Text('Result: ${snapshot.data}'),
+              ),
+            ];
+          } else if (snapshot.hasError) {// エラーが発生した場合の処理
+            children = <Widget>[
+              const Icon(
+                Icons.error_outline,
+                color: Colors.red,
+                size: 60,
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Text('Error: ${snapshot.error}'),
+              ),
+            ];
+          } else { // 値が存在しない場合の処理
+            children = const <Widget>[
+              SizedBox(
+                width: 60,
+                height: 60,
+                child: CircularProgressIndicator(),
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: 16),
+                child: Text('Awaiting result...'),
+              ),
+            ];
+          }
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: children,
+            ),
+          );
+        },
+      
+    );
+  
     return ListView.builder(
       itemCount: students.length,
       itemBuilder: (context, index) {
@@ -102,7 +144,7 @@ class StudentCardList extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text("学籍番号: ${students[index]['student_id']}"),
                 Text("大学: ${students[index]['university']}"),
-                Text("学部: ${students[index]['facaulty']}"),
+                Text("学部: ${students[index]['faculty']}"),
               ],
             ),
           ),
@@ -110,4 +152,8 @@ class StudentCardList extends StatelessWidget {
       },
     );
   }
+}
+
+extension on Future<List<Member>> {
+  get length => null;
 }
