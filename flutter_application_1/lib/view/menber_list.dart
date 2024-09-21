@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -39,16 +41,22 @@ class StudentCardList extends StatelessWidget {
       "name": "中野雅",
       "student_id": "*******",
       "university": "お茶の水女子大学",
-      "facaulty": "****"
+      "facaulty": "****",
+      "department": "*****",
+       "created_at": "2024/09/21"
     },
     {
       "id": "2",
       "name": "佐藤有紗",
       "student_id": "********",
       "university": "東京都立大学",
-      "facaulty": "****"
+      "facaulty": "****",
+      "department": "*****",
+       "created_at": "2024/09/21"
     }
   ];
+
+  StudentCardList({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -56,17 +64,17 @@ class StudentCardList extends StatelessWidget {
       itemCount: students.length,
       itemBuilder: (context, index) {
         return Card(
-          margin: EdgeInsets.all(10),
+          margin: const EdgeInsets.all(10),
           child: Padding(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   students[index]['name']!,
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text("学籍番号: ${students[index]['student_id']}"),
                 Text("大学: ${students[index]['university']}"),
                 Text("学部: ${students[index]['facaulty']}"),
