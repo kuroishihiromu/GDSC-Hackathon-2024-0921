@@ -54,12 +54,25 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Student Card Example',
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('TeamA'),
+      home: DefaultTabController(
+        length: 3,
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('一覧'),
+            bottom: const TabBar(tabs: <Widget>[
+              Tab(child: Text("TeamA")),
+              Tab(child: Text("TeamB")),
+              Tab(child: Text("TeamC")),
+            ]),
+          ),
+          body: TabBarView(
+            children: <Widget>[
+              StudentCardList(), // 一枚目のタブにStudentCardListを表示
+              Center(child: Text("Team B の情報がここに表示されます。")),
+              Center(child: Text("Team C の情報がここに表示されます。")),
+            ],
+          ),
         ),
-        body: StudentCardList(),
       ),
     );
   }
