@@ -1,11 +1,16 @@
 [
     {
-        "id":2,
-        "name":"次郎"
-    },
-    {
         "id":1,
         "name":"中野雅",
-        "student_id":"2420523"
+        "student_id":"2420523",
+        "university":"お茶の水女子大学",
+        "facaulty":"情報科学科"
+    },
+    {
+        "id":2,
+        "name":"佐藤有紗",
+        "student_id":"24140042",
+        "university":"東京都立大学",
+        "facaulty":"システムデザイン学部"
     }
 ]
