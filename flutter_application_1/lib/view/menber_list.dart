@@ -12,12 +12,25 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Student Card Example',
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('TeamA'),
+      home: DefaultTabController(
+        length: 3,
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('一覧'),
+            bottom: const TabBar(tabs: <Widget>[
+              Tab(child: Text("TeamA")),
+              Tab(child: Text("TeamB")),
+              Tab(child: Text("TeamC")),
+            ]),
+          ),
+          body: TabBarView(
+            children: <Widget>[
+              StudentCardList(), // 一枚目のタブにStudentCardListを表示
+              Center(child: Text("Team B の情報がここに表示されます。")),
+              Center(child: Text("Team C の情報がここに表示されます。")),
+            ],
+          ),
         ),
-        body: StudentCardList(),
       ),
     );
   }
@@ -28,18 +41,18 @@ class StudentCardList extends StatelessWidget {
     {
       "id": "1",
       "name": "中野雅",
-      "student_id": "*******",
+      "student_id": "2420523",
       "university": "お茶の水女子大学",
-      "facaulty": "****",
+      "facaulty": "情報科学科",
       "department": "*****",
        "created_at": "2024/09/21"
     },
     {
       "id": "2",
       "name": "佐藤有紗",
-      "student_id": "********",
+      "student_id": "24140042",
       "university": "東京都立大学",
-      "facaulty": "****",
+      "facaulty": "システムデザイン学部",
       "department": "*****",
        "created_at": "2024/09/21"
     }
