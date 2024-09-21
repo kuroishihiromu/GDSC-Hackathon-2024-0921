@@ -2,6 +2,46 @@ import 'dart:convert';  // JSONをデコードするために必要
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';  // assetsから読み込むために必要
 
+class Member {
+  final int memberId;
+  final String name;
+  final String studentId; 
+  final String universityname;
+  final String faculty;
+  final String department;
+  final String createdat;
+
+  Member({required this.memberId, required this.name, required this.studentId, required this. universityname, required this. faculty, required this. createdat, required this.department}) 
+  
+
+  // JSONデータをDartオブジェクトに変換するためのファクトリメソッド
+  // ignore: empty_constructor_bodies
+  factory Member.fromJson(Map<String, dynamic> json) {
+    return Member(
+      memberId: json['id'],
+      name: json['name'],
+      studentId: json['student_id'],
+      universityname: json['university_name'],
+      faculty: json['faculty'],
+      department: json['department'],
+      createdat: json['created_at']
+    );
+  }
+}
+
+class MemberListService {
+  // assetsからdatabase.jsonを読み込んで、Memberのリストを返す
+  Future<List<Member>> loadMemberList() async {
+    // assetsからJSONファイルを読み込み
+    final String response = await rootBundle.loadString('assets/database.json');
+    final data = json.decode(response); // JSONデータをデコード
+    List<dynamic> membersJson = data['member_list'];
+    
+    // 各メンバーのデータをMemberオブジェクトに変換してリストにする
+    return membersJson.map((json) => Member.fromJson(json)).toList();
+  }
+}
+
 void main() {
   runApp(const MyApp());
 }
@@ -12,25 +52,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: DefaultTabController(
-        length: 3,
-        child: Scaffold(
-          appBar: AppBar(
-            title: const Text('一覧'),
-            bottom: const TabBar(tabs: <Widget>[
-              Tab(child: Text("TeamA")),
-              Tab(child: Text("TeamB")),
-              Tab(child: Text("TeamC")),
-            ]),
-          ),
-          body: TabBarView(
-            children: <Widget>[
-              StudentCardList(), // 一枚目のタブにStudentCardListを表示
-              Center(child: Text("Team B の情報がここに表示されます。")),
-              Center(child: Text("Team C の情報がここに表示されます。")),
-            ],
-          ),
+      title: 'Student Card Example',
+      home: Scaffold(
+        appBar: AppBar(
+          title: const Text('TeamA'),
         ),
+        body: StudentCardList(),
       ),
     );
   }
@@ -41,18 +68,18 @@ class StudentCardList extends StatelessWidget {
     {
       "id": "1",
       "name": "中野雅",
-      "student_id": "2420523",
+      "student_id": "*******",
       "university": "お茶の水女子大学",
-      "facaulty": "情報科学科",
+      "facaulty": "****",
       "department": "*****",
        "created_at": "2024/09/21"
     },
     {
       "id": "2",
       "name": "佐藤有紗",
-      "student_id": "24140042",
+      "student_id": "********",
       "university": "東京都立大学",
-      "facaulty": "システムデザイン学部",
+      "facaulty": "****",
       "department": "*****",
        "created_at": "2024/09/21"
     }
