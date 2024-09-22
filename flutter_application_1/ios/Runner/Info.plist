@@ -45,5 +45,10 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>画像からテキストデータを読み取ります。</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>このアプリではマイクを使用します。</string>
+
 </dict>
 </plist>
