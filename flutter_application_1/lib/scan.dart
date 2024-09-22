@@ -1,30 +1,14 @@
-import 'dart:async'; // Completerのためのインポート
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:image_picker/image_picker.dart'; // 画像選択用パッケージ
 import 'package:google_generative_ai/google_generative_ai.dart'; // GenerativeModelのインポート
 
-// OCRと生成AI用のAPIキーを指定
-const String visionApiKey = 'AIzaSyAKM3WhkIQeaWEO5azcIwTfS1fmwr-lymI';
-const String generativeAiApiKey = 'AIzaSyDL5yYRQS93_x1dt-6OQvhNZ-Wk_VTcgWI';
-
-// 画像選択処理
-Future<Uint8List?> performImageScan() async {
-  final picker = ImagePicker();
-  final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-  if (pickedFile != null) {
-    return await pickedFile.readAsBytes();
-  } else {
-    return null;
-  }
-}
+// APIキーを指定
+const String visionApiKey = '***';
+const String generativeAiApiKey = '***';
 
 // OCR処理
-Future<String> performOCR(Uint8List imageBytes) async {
-  final String base64Image = base64Encode(imageBytes);
+Future<String> performOCR({required String base64Image}) async {
   final Map<String, dynamic> requestData = {
     'requests': [
       {
@@ -68,9 +52,8 @@ Future<String> generateAIContent(String scannedText) async {
   ];
 
   final response = await model.generateContent(content);
+  print(response);
   if (response.text != null) {
-    // 生成されたコンテンツをデバッグ用に表示
-    print('Generated AI Content: ${response.text}');
     return response.text!;
   } else {
     return '生成されたコンテンツがありません。';
@@ -95,4 +78,3 @@ Map<String, String> convertToJson(String data) {
 
   return jsonData;
 }
-

@@ -1,7 +1,7 @@
 // main.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/view/member_list.dart';
-import 'package:flutter_application_1/infrastructure/upload_button.dart';
+import 'package:flutter_application_1/infrastructure/upload.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 
@@ -83,7 +83,7 @@ class UploadButton extends StatelessWidget {
     return ElevatedButton(
       onPressed: () {
         // ここにデータをアップロードする処理を追加
-        storeMockDataInFirestore();
+        // storeMockDataInFirestore();
       },
       child: const Text('Upload User Data'),
     );
