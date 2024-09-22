@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -41,8 +43,8 @@ class MemberList extends StatelessWidget {
               ),
             );
           },
-          child: const Icon(Icons.add_a_photo),
           tooltip: 'メンバー追加',
+          child: const Icon(Icons.add_a_photo),
         ),
       ),
     );
@@ -83,6 +85,7 @@ class StudentCardList extends StatelessWidget {
           return ListView.builder(
             itemCount: students.length,
             itemBuilder: (context, index) {
+              // ignore: unused_local_variable
               var studentData = students[index].data() as Map<String, dynamic>;
               var documentId = students[index].id; // ドキュメントIDを取得
 
@@ -119,6 +122,7 @@ class StudentCardList extends StatelessWidget {
                   }
                 },
               );
+              // ignore: unused_local_variable
               var iconButton2 = iconButton;
               return Card(
                 margin: const EdgeInsets.all(10),
