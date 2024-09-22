@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 // モックデータを用意
 Map<String, dynamic> mockUserData = {
@@ -14,8 +15,12 @@ Future<void> storeMockDataInFirestore() async {
   try {
     // Firestoreにモックデータを格納
     await FirebaseFirestore.instance.collection('students').add(mockUserData);
-    print('Mock data stored in Firestore successfully');
+    if (kDebugMode) {
+      print('Mock data stored in Firestore successfully');
+    }
   } catch (e) {
-    print('Error storing data in Firestore: $e');
+    if (kDebugMode) {
+      print('Error storing data in Firestore: $e');
+    }
   }
 }
