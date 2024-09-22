@@ -57,7 +57,7 @@ class StudentCardList extends StatelessWidget {
   Future<List<QueryDocumentSnapshot>> loadStudentsFromFirestore() async {
     try {
       QuerySnapshot snapshot =
-          await FirebaseFirestore.instance.collection('students').get();
+          await FirebaseFirestore.instance.collection('students').where('isDeleted',isEqualTo: false).get();
       return snapshot.docs;
     } catch (e) {
       if (kDebugMode) {
