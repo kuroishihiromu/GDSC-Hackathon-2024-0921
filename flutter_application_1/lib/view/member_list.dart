@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:camera/camera.dart';
@@ -58,7 +59,9 @@ class StudentCardList extends StatelessWidget {
       List<Map<String, dynamic>> students = snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
       return students;
     } catch (e) {
-      print('Error loading students from Firestore: $e');
+      if (kDebugMode) {
+        print('Error loading students from Firestore: $e');
+      }
       return [];
     }
   }
@@ -77,6 +80,41 @@ class StudentCardList extends StatelessWidget {
           return ListView.builder(
             itemCount: students.length,
             itemBuilder: (context, index) {
+               var studentData = students[index].data() as Map<String, dynamic>;
+              var documentId = students[index].id;  // ドキュメントIDを取得
+
+
+              var iconButton = IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () async {
+                          // 削除確認のダイアログを表示
+                          bool confirmDelete = await showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text("削除確認"),
+                                content: const Text("この学生を削除しますか？"),
+                                actions: [
+                                  TextButton(
+                                    child: const Text("キャンセル"),
+                                    onPressed: () => Navigator.of(context).pop(false),
+                                  ),
+                                  TextButton(
+                                    child: const Text("削除"),
+                                    onPressed: () => Navigator.of(context).pop(true),
+                                  ),
+                                ],
+                              );
+                            },
+                          ) ?? false;
+
+                          if (confirmDelete) {
+                            // Firestoreから学生データを削除
+                            await deleteStudent(documentId);
+                          }
+                        },
+                      );
+              var iconButton2 = iconButton;
               return Card(
                 margin: const EdgeInsets.all(10),
                 child: Padding(
@@ -96,6 +134,9 @@ class StudentCardList extends StatelessWidget {
                     ],
                   ),
                 ),
+                // 削除ボタン
+
+
               );
             },
           );
@@ -104,3 +145,13 @@ class StudentCardList extends StatelessWidget {
     );
   }
 }
+
+extension on Map<String, dynamic> {
+   get id => null;
+
+  data() {}
+}
+
+deleteStudent(documentId) {
+}
+
