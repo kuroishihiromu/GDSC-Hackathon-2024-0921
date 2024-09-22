@@ -1,0 +1,108 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+
+class StudentCardList extends StatelessWidget {
+  const StudentCardList({super.key});
+
+  // Firestoreから学生データを取得する関数
+  Future<List<QueryDocumentSnapshot>> loadStudentsFromFirestore() async {
+    try {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('students').get();
+      return snapshot.docs;
+    } catch (e) {
+      print('Error loading students from Firestore: $e');
+      return [];
+    }
+  }
+
+  // Firestoreから特定の学生データを削除する関数
+  Future<void> deleteStudent(String documentId) async {
+    try {
+      await FirebaseFirestore.instance.collection('students').doc(documentId).delete();
+      print('Student deleted successfully');
+    } catch (e) {
+      print('Error deleting student: $e');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<QueryDocumentSnapshot>>(
+      future: loadStudentsFromFirestore(), // Firestoreからデータをロード
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else {
+          final students = snapshot.data!;
+          return ListView.builder(
+            itemCount: students.length,
+            itemBuilder: (context, index) {
+              var studentData = students[index].data() as Map<String, dynamic>;
+              var documentId = students[index].id;  // ドキュメントIDを取得
+
+              return Card(
+                margin: const EdgeInsets.all(10),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // 学生情報を表示する部分
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            studentData['name'] ?? 'No Name',
+                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 8),
+                          Text("学籍番号: ${studentData['student_id'] ?? 'N/A'}"),
+                          Text("大学: ${studentData['university_name'] ?? 'N/A'}"),
+                          Text("学部: ${studentData['faculty'] ?? 'N/A'}"),
+                          Text("学科: ${studentData['department'] ?? 'N/A'}"),
+                        ],
+                      ),
+                      // 削除ボタン
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () async {
+                          // 削除確認のダイアログを表示
+                          bool confirmDelete = await showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text("削除確認"),
+                                content: const Text("この学生を削除しますか？"),
+                                actions: [
+                                  TextButton(
+                                    child: const Text("キャンセル"),
+                                    onPressed: () => Navigator.of(context).pop(false),
+                                  ),
+                                  TextButton(
+                                    child: const Text("削除"),
+                                    onPressed: () => Navigator.of(context).pop(true),
+                                  ),
+                                ],
+                              );
+                            },
+                          ) ?? false;
+
+                          if (confirmDelete) {
+                            // Firestoreから学生データを削除
+                            await deleteStudent(documentId);
+                          }
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+        }
+      },
+    );
+  }
+}
