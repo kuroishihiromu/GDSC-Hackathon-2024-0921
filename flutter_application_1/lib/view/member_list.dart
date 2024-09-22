@@ -53,24 +53,18 @@ class MemberList extends StatelessWidget {
 class StudentCardList extends StatelessWidget {
   const StudentCardList({super.key});
 
-  // Firestoreから学生データを取得する関数
-  Future<List<QueryDocumentSnapshot>> loadStudentsFromFirestore() async {
-    try {
-      QuerySnapshot snapshot =
-          await FirebaseFirestore.instance.collection('students').get();
-      return snapshot.docs;
-    } catch (e) {
-      if (kDebugMode) {
-        print('Error loading students from Firestore: $e');
-      }
-      return [];
-    }
+  // Firestoreから学生データをストリームで取得する関数
+  Stream<List<QueryDocumentSnapshot>> loadStudentsFromFirestore() {
+    return FirebaseFirestore.instance
+        .collection('students')
+        .snapshots()
+        .map((snapshot) => snapshot.docs);
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<QueryDocumentSnapshot>>(
-      future: loadStudentsFromFirestore(), // Firestoreからデータをロード
+    return StreamBuilder<List<QueryDocumentSnapshot>>(
+      stream: loadStudentsFromFirestore(), // Firestoreからデータをストリームでロード
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
