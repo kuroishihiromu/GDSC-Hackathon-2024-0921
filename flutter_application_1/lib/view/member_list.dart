@@ -14,6 +14,23 @@ class MemberList extends StatefulWidget {
 
 class _MemberListState extends State<MemberList> {
   List<String> tabNames = ['TeamA', 'TeamB', 'TeamC']; // 初期タブ名
+  List<String> groupIds = []; // FirestoreのグループIDを格納するリスト
+  int _currentIndex = 0; // 現在のタブインデックス
+
+  @override
+  void initState() {
+    super.initState();
+    _loadGroupsFromFirestore(); // Firestoreからグループを読み込む
+  }
+
+  // Firestoreからグループを読み込む関数
+  void _loadGroupsFromFirestore() async {
+    final snapshot = await FirebaseFirestore.instance.collection('groups').get();
+    setState(() {
+      groupIds = snapshot.docs.map((doc) => doc.id).toList();
+      tabNames = snapshot.docs.map((doc) => doc['name'] as String).toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,24 +40,26 @@ class _MemberListState extends State<MemberList> {
         appBar: AppBar(
           title: const Text('一覧'),
           bottom: TabBar(
-            isScrollable: true, // タブをスクロールできるように
+            isScrollable: true,
+            onTap: (index) {
+              setState(() {
+                _currentIndex = index; // 現在のタブインデックスを更新
+              });
+            },
             tabs: tabNames
-                .map((tabName) => Tab(
-                      child: Text(tabName),
-                    ))
+                .map((tabName) => Tab(child: Text(tabName)))
                 .toList(),
           ),
         ),
         body: TabBarView(
-          children: tabNames.map((tabName) {
-            if (tabName == 'TeamA') {
-              return const StudentCardList(); // Team Aのデータを表示
-            } else {
-              return Center(
-                  child: Text("$tabName の情報がここに表示されます。"));
-            }
+          children: tabNames.asMap().entries.map((entry) {
+            int index = entry.key;
+            String tabName = entry.value;
+            
+            return StudentCardList(groupId: groupIds[index]); // groupIdを渡す
           }).toList(),
         ),
+
         floatingActionButton: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -80,8 +99,14 @@ class _MemberListState extends State<MemberList> {
                 );
 
                 if (newTabName != null && newTabName.isNotEmpty) {
+                  // Firestoreに新しいタブ名を保存
+                  var docRef = await FirebaseFirestore.instance.collection('groups').add({
+                    'name': newTabName,
+                  });
+
                   setState(() {
                     tabNames.add(newTabName);
+                    groupIds.add(docRef.id); // 新しいグループIDを追加
                   });
                 }
               },
@@ -95,12 +120,14 @@ class _MemberListState extends State<MemberList> {
                 final cameras = await availableCameras();
                 final firstCamera = cameras.first;
 
+                // 現在のタブのgroupIdを取得
+                String currentGroupId = groupIds[_currentIndex]; 
+                
                 // カメラ画面に遷移
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        TakePictureScreen(camera: firstCamera),
+                    builder: (context) => TakePictureScreen(camera: firstCamera, groupId: currentGroupId),
                   ),
                 );
               },
@@ -115,15 +142,18 @@ class _MemberListState extends State<MemberList> {
 }
 
 class StudentCardList extends StatelessWidget {
-  const StudentCardList({super.key});
+  final String groupId;
+  const StudentCardList({super.key, required this.groupId});
 
   // Firestoreから学生データをストリームで取得する関数
   Stream<List<QueryDocumentSnapshot>> loadStudentsFromFirestore() {
     return FirebaseFirestore.instance
         .collection('students')
+        .where('group_id', isEqualTo: groupId) // group_idでフィルタリング
         .snapshots()
         .map((snapshot) => snapshot.docs);
   }
+
 
   @override
   Widget build(BuildContext context) {

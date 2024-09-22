@@ -12,8 +12,9 @@ import 'package:flutter_application_1/infrastructure/upload.dart'; // upload.dar
 // カメラで写真を撮影するウィジェット
 class TakePictureScreen extends StatefulWidget {
   final CameraDescription camera;
+  final String groupId;
 
-  const TakePictureScreen({super.key, required this.camera});
+  const TakePictureScreen({super.key, required this.camera, required this.groupId});
 
   @override
   TakePictureScreenState createState() => TakePictureScreenState();
@@ -61,10 +62,9 @@ class TakePictureScreenState extends State<TakePictureScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (BuildContext context) => DisplayPictureScreen(base64Image: base64String), // ここでBuildContextを使用
+              builder: (BuildContext context) => DisplayPictureScreen(base64Image: base64String, groupId: widget.groupId),
             ),
           );
-
         }
       });
     } catch (e) {
@@ -98,8 +98,8 @@ class TakePictureScreenState extends State<TakePictureScreen> {
 class DisplayPictureScreen extends StatefulWidget {
   final String base64Image;
 
-  const DisplayPictureScreen({super.key, required this.base64Image});
-
+  final String groupId;
+  const DisplayPictureScreen({super.key, required this.base64Image, required this.groupId});
   @override
   _DisplayPictureScreenState createState() => _DisplayPictureScreenState();
 }
@@ -127,9 +127,9 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
       Map<String, String> jsonData = convertToJson(aiResult);
 
       // Firestoreにデータを保存
-      await storeDataInFirestore(jsonData);
+      // await storeDataInFirestore(jsonData, 'group_id');
+      await storeDataInFirestore(jsonData, widget.groupId); // groupIdを渡す
 
-      // 成功時にリストページに戻る
       // 成功時にリストページに戻る
       if (mounted) {
         Navigator.pop(context); // 一つ前の画面に戻る
