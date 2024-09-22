@@ -5,45 +5,136 @@ import 'package:camera/camera.dart';
 import 'Camera.dart'; // Camera.dartをインポート
 import 'package:flutter_application_1/infrastructure/remove_button.dart'; // 削除ボタン機能のimport
 
-class MemberList extends StatelessWidget {
+class MemberList extends StatefulWidget {
   const MemberList({super.key});
+
+  @override
+  _MemberListState createState() => _MemberListState();
+}
+
+class _MemberListState extends State<MemberList> {
+  List<String> tabNames = ['TeamA', 'TeamB', 'TeamC']; // 初期タブ名
+  List<String> groupIds = []; // FirestoreのグループIDを格納するリスト
+  int _currentIndex = 0; // 現在のタブインデックス
+
+  @override
+  void initState() {
+    super.initState();
+    _loadGroupsFromFirestore(); // Firestoreからグループを読み込む
+  }
+
+  // Firestoreからグループを読み込む関数
+  void _loadGroupsFromFirestore() async {
+    final snapshot = await FirebaseFirestore.instance.collection('groups').get();
+    setState(() {
+      groupIds = snapshot.docs.map((doc) => doc.id).toList();
+      tabNames = snapshot.docs.map((doc) => doc['name'] as String).toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: tabNames.length,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('一覧'),
-          bottom: const TabBar(tabs: <Widget>[
-            Tab(child: Text("TeamA")),
-            Tab(child: Text("TeamB")),
-            Tab(child: Text("TeamC")),
-          ]),
+          bottom: TabBar(
+            isScrollable: true,
+            onTap: (index) {
+              setState(() {
+                _currentIndex = index; // 現在のタブインデックスを更新
+              });
+            },
+            tabs: tabNames
+                .map((tabName) => Tab(child: Text(tabName)))
+                .toList(),
+          ),
         ),
-        body: const TabBarView(
-          children: <Widget>[
-            StudentCardList(), // Team Aのデータを表示
-            Center(child: Text("Team B の情報がここに表示されます。")),
-            Center(child: Text("Team C の情報がここに表示されます。")),
-          ],
+        body: TabBarView(
+          children: tabNames.asMap().entries.map((entry) {
+            int index = entry.key;
+            String tabName = entry.value;
+            
+            return StudentCardList(groupId: groupIds[index]); // groupIdを渡す
+          }).toList(),
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            // カメラリストを取得
-            final cameras = await availableCameras();
-            final firstCamera = cameras.first;
 
-            // カメラ画面に遷移
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => TakePictureScreen(camera: firstCamera),
-              ),
-            );
-          },
-          tooltip: 'メンバー追加',
-          child: const Icon(Icons.add_a_photo),
+        floatingActionButton: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FloatingActionButton(
+              onPressed: () async {
+                // タブを追加するダイアログを表示
+                String? newTabName = await showDialog<String>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    String tabName = '';
+                    return AlertDialog(
+                      title: const Text("新しいタブを追加"),
+                      content: TextField(
+                        onChanged: (value) {
+                          tabName = value;
+                        },
+                        decoration: const InputDecoration(
+                          hintText: 'タブ名を入力',
+                        ),
+                      ),
+                      actions: [
+                        TextButton(
+                          child: const Text("キャンセル"),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        TextButton(
+                          child: const Text("追加"),
+                          onPressed: () {
+                            Navigator.of(context).pop(tabName);
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+
+                if (newTabName != null && newTabName.isNotEmpty) {
+                  // Firestoreに新しいタブ名を保存
+                  var docRef = await FirebaseFirestore.instance.collection('groups').add({
+                    'name': newTabName,
+                  });
+
+                  setState(() {
+                    tabNames.add(newTabName);
+                    groupIds.add(docRef.id); // 新しいグループIDを追加
+                  });
+                }
+              },
+              tooltip: 'タブを追加',
+              child: const Icon(Icons.add),
+            ),
+            const SizedBox(height: 16),
+            FloatingActionButton(
+              onPressed: () async {
+                // カメラリストを取得
+                final cameras = await availableCameras();
+                final firstCamera = cameras.first;
+
+                // 現在のタブのgroupIdを取得
+                String currentGroupId = groupIds[_currentIndex]; 
+                
+                // カメラ画面に遷移
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TakePictureScreen(camera: firstCamera, groupId: currentGroupId),
+                  ),
+                );
+              },
+              tooltip: 'メンバー追加',
+              child: const Icon(Icons.add_a_photo),
+            ),
+          ],
         ),
       ),
     );
@@ -51,15 +142,18 @@ class MemberList extends StatelessWidget {
 }
 
 class StudentCardList extends StatelessWidget {
-  const StudentCardList({super.key});
+  final String groupId;
+  const StudentCardList({super.key, required this.groupId});
 
   // Firestoreから学生データをストリームで取得する関数
   Stream<List<QueryDocumentSnapshot>> loadStudentsFromFirestore() {
     return FirebaseFirestore.instance
         .collection('students')
+        .where('group_id', isEqualTo: groupId) // group_idでフィルタリング
         .snapshots()
         .map((snapshot) => snapshot.docs);
   }
+
 
   @override
   Widget build(BuildContext context) {
