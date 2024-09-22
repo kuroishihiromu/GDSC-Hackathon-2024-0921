@@ -83,7 +83,14 @@ class StudentCardList extends StatelessWidget {
           return ListView.builder(
             itemCount: students.length,
             itemBuilder: (context, index) {
-              var studentData = students[index].data() as Map<String, dynamic>;
+              // ドキュメントデータがnullでないことを確認
+              var studentData = students[index].data() as Map<String, dynamic>?;
+
+              // studentDataがnullの場合は、適切な処理を行う
+              if (studentData == null) {
+                return const SizedBox.shrink(); // 何も表示しない
+              }
+
               var documentId = students[index].id; // ドキュメントIDを取得
 
               return Card(
