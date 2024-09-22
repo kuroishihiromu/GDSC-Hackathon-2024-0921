@@ -8,7 +8,7 @@ import 'package:firebase_core/firebase_core.dart';
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -76,7 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
 }
 
 class UploadButton extends StatelessWidget {
-  const UploadButton({Key? key}) : super(key: key);
+  const UploadButton({super.key});
 
   @override
   Widget build(BuildContext context) {
