@@ -4,7 +4,7 @@ import 'dart:convert'; // Base64変換に使用
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart'; // 写真を一時保存するために使用
-import 'package:path/path.dart'; // ファイルパスの操作に使用
+import 'package:path/path.dart' as path; // ファイルパスの操作に使用
 import 'package:image/image.dart' as img; // 画像のBase64変換に使用
 import 'package:flutter_application_1/scan.dart'; // scan.dart のOCR処理
 import 'package:flutter_application_1/infrastructure/upload.dart'; // upload.dart のFirestore処理をインポート
@@ -28,7 +28,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     super.initState();
     _controller = CameraController(
       widget.camera,
-      ResolutionPreset.low,
+      ResolutionPreset.medium,
     );
     _initializeControllerFuture = _controller.initialize();
   }
@@ -47,7 +47,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
 
       // 撮影した写真を保存するためのパスを取得
       final tempDir = await getTemporaryDirectory();
-      final imagePath = join(tempDir.path, '${DateTime.now()}.png');
+      final imagePath = path.join(tempDir.path, '${DateTime.now()}.png');
 
       // 写真を撮影し、指定されたパスに保存
       await _controller.takePicture().then((XFile file) async {
@@ -61,9 +61,10 @@ class TakePictureScreenState extends State<TakePictureScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => DisplayPictureScreen(base64Image: base64String),
+              builder: (BuildContext context) => DisplayPictureScreen(base64Image: base64String), // ここでBuildContextを使用
             ),
           );
+
         }
       });
     } catch (e) {
@@ -125,18 +126,18 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
       // AI結果をJSONに変換
       Map<String, String> jsonData = convertToJson(aiResult);
 
-      // 結果を画面に反映
-      setState(() {
-        _ocrResult = aiResult;
-        _jsonData = jsonData;
-      });
-
       // Firestoreにデータを保存
-      await storeDataInFirestore(jsonData);  // ここでJSONデータをFirestoreに送信
+      await storeDataInFirestore(jsonData);
 
-      print(_ocrResult);
-      print(_jsonData);
-      
+      // 成功時にリストページに戻る
+      // 成功時にリストページに戻る
+      if (mounted) {
+        Navigator.pop(context); // 一つ前の画面に戻る
+        Navigator.pop(context);
+        // さらに戻りたい場合は、追加でポップを行う
+      }
+
+
     } catch (e) {
       setState(() {
         _ocrResult = 'エラーが発生しました: $e';
@@ -147,6 +148,7 @@ class _DisplayPictureScreenState extends State<DisplayPictureScreen> {
       });
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
