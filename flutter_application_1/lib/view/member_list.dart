@@ -5,45 +5,109 @@ import 'package:camera/camera.dart';
 import 'Camera.dart'; // Camera.dartをインポート
 import 'package:flutter_application_1/infrastructure/remove_button.dart'; // 削除ボタン機能のimport
 
-class MemberList extends StatelessWidget {
+class MemberList extends StatefulWidget {
   const MemberList({super.key});
+
+  @override
+  _MemberListState createState() => _MemberListState();
+}
+
+class _MemberListState extends State<MemberList> {
+  List<String> tabNames = ['TeamA', 'TeamB', 'TeamC']; // 初期タブ名
 
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 3,
+      length: tabNames.length,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('一覧'),
-          bottom: const TabBar(tabs: <Widget>[
-            Tab(child: Text("TeamA")),
-            Tab(child: Text("TeamB")),
-            Tab(child: Text("TeamC")),
-          ]),
+          bottom: TabBar(
+            isScrollable: true, // タブをスクロールできるように
+            tabs: tabNames
+                .map((tabName) => Tab(
+                      child: Text(tabName),
+                    ))
+                .toList(),
+          ),
         ),
-        body: const TabBarView(
-          children: <Widget>[
-            StudentCardList(), // Team Aのデータを表示
-            Center(child: Text("Team B の情報がここに表示されます。")),
-            Center(child: Text("Team C の情報がここに表示されます。")),
-          ],
+        body: TabBarView(
+          children: tabNames.map((tabName) {
+            if (tabName == 'TeamA') {
+              return const StudentCardList(); // Team Aのデータを表示
+            } else {
+              return Center(
+                  child: Text("$tabName の情報がここに表示されます。"));
+            }
+          }).toList(),
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () async {
-            // カメラリストを取得
-            final cameras = await availableCameras();
-            final firstCamera = cameras.first;
+        floatingActionButton: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FloatingActionButton(
+              onPressed: () async {
+                // タブを追加するダイアログを表示
+                String? newTabName = await showDialog<String>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    String tabName = '';
+                    return AlertDialog(
+                      title: const Text("新しいタブを追加"),
+                      content: TextField(
+                        onChanged: (value) {
+                          tabName = value;
+                        },
+                        decoration: const InputDecoration(
+                          hintText: 'タブ名を入力',
+                        ),
+                      ),
+                      actions: [
+                        TextButton(
+                          child: const Text("キャンセル"),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                        TextButton(
+                          child: const Text("追加"),
+                          onPressed: () {
+                            Navigator.of(context).pop(tabName);
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
 
-            // カメラ画面に遷移
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => TakePictureScreen(camera: firstCamera),
-              ),
-            );
-          },
-          tooltip: 'メンバー追加',
-          child: const Icon(Icons.add_a_photo),
+                if (newTabName != null && newTabName.isNotEmpty) {
+                  setState(() {
+                    tabNames.add(newTabName);
+                  });
+                }
+              },
+              tooltip: 'タブを追加',
+              child: const Icon(Icons.add),
+            ),
+            const SizedBox(height: 16),
+            FloatingActionButton(
+              onPressed: () async {
+                // カメラリストを取得
+                final cameras = await availableCameras();
+                final firstCamera = cameras.first;
+
+                // カメラ画面に遷移
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        TakePictureScreen(camera: firstCamera),
+                  ),
+                );
+              },
+              tooltip: 'メンバー追加',
+              child: const Icon(Icons.add_a_photo),
+            ),
+          ],
         ),
       ),
     );
