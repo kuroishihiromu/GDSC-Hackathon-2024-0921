@@ -4,8 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:google_generative_ai/google_generative_ai.dart'; // GenerativeModelのインポート
 
 // APIキーを指定
-const String visionApiKey = 'AIzaSyBqSJI4E_lYgN1pJwDmOB_KQ6t-K37s1Dg';
-const String generativeAiApiKey = 'AIzaSyD0IUEDUIiUSSB3_IQZ3bY8HUcYcs7_PaI';
+const String visionApiKey = '***';
+const String generativeAiApiKey = '***';
 
 // OCR処理
 Future<String> performOCR({required String base64Image}) async {
