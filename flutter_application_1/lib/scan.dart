@@ -7,8 +7,8 @@ import 'package:image_picker/image_picker.dart'; // 画像選択用パッケー�
 import 'package:google_generative_ai/google_generative_ai.dart'; // GenerativeModelのインポート
 
 // OCRと生成AI用のAPIキーを指定
-const String visionApiKey = '***';
-const String generativeAiApiKey = '***';
+const String visionApiKey = 'AIzaSyAKM3WhkIQeaWEO5azcIwTfS1fmwr-lymI';
+const String generativeAiApiKey = 'AIzaSyDL5yYRQS93_x1dt-6OQvhNZ-Wk_VTcgWI';
 
 // 画像選択処理
 Future<Uint8List?> performImageScan() async {
@@ -95,3 +95,4 @@ Map<String, String> convertToJson(String data) {
 
   return jsonData;
 }
+

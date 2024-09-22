@@ -1,7 +1,7 @@
-// member_list.dart
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:flutter/services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:camera/camera.dart';
+import 'Camera.dart';  // Camera.dartをインポート
 
 class MemberList extends StatelessWidget {
   const MemberList({super.key});
@@ -21,10 +21,27 @@ class MemberList extends StatelessWidget {
         ),
         body: const TabBarView(
           children: <Widget>[
-            StudentCardList(),
+            StudentCardList(), // Team Aのデータを表示
             Center(child: Text("Team B の情報がここに表示されます。")),
             Center(child: Text("Team C の情報がここに表示されます。")),
           ],
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            // カメラリストを取得
+            final cameras = await availableCameras();
+            final firstCamera = cameras.first;
+
+            // カメラ画面に遷移
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => TakePictureScreen(camera: firstCamera),
+              ),
+            );
+          },
+          child: const Icon(Icons.add_a_photo),
+          tooltip: 'メンバー追加',
         ),
       ),
     );
@@ -34,19 +51,22 @@ class MemberList extends StatelessWidget {
 class StudentCardList extends StatelessWidget {
   const StudentCardList({super.key});
 
-  Future<List<Map<String, String>>> loadStudents() async {
-    final String response = await rootBundle.loadString('assets/Database.json');
-    final data = json.decode(response);
-
-    return List<Map<String, String>>.from(
-      (data['students'] as List).map((student) => Map<String, String>.from(student)),
-    );
+  // Firestoreから学生データを取得する関数
+  Future<List<Map<String, dynamic>>> loadStudentsFromFirestore() async {
+    try {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('students').get();
+      List<Map<String, dynamic>> students = snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+      return students;
+    } catch (e) {
+      print('Error loading students from Firestore: $e');
+      return [];
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Map<String, String>>>(
-      future: loadStudents(),
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: loadStudentsFromFirestore(), // Firestoreからデータをロード
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -65,13 +85,14 @@ class StudentCardList extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        students[index]['name']!,
+                        students[index]['name'] ?? 'No Name',
                         style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                       ),
                       const SizedBox(height: 8),
-                      Text("学籍番号: ${students[index]['student_id']}"),
-                      Text("大学: ${students[index]['university']}"),
-                      Text("学部: ${students[index]['faculty']}"), // 修正
+                      Text("学籍番号: ${students[index]['student_id'] ?? 'N/A'}"),
+                      Text("大学: ${students[index]['university_name'] ?? 'N/A'}"),
+                      Text("学部: ${students[index]['faculty'] ?? 'N/A'}"),
+                      Text("学科: ${students[index]['department'] ?? 'N/A'}"),
                     ],
                   ),
                 ),
